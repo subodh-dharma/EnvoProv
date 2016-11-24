@@ -2,7 +2,7 @@ case $OSTYPE in
   linux*)
       #wget https://packages.chef.io/stable/ubuntu/12.04/chefdk_0.19.6-1_amd64.deb
       #sudo dpkg -i chefdk_0.19.6-1_amd64.deb
-      curl -L https://omnitruck.chef.io/install.sh
+      #curl -L https://omnitruck.chef.io/install.sh
     if ! hash mongod 2>/dev/null; then
       sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
       echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
@@ -35,4 +35,4 @@ case $OSTYPE in
   echo "Installation steps missing for $OSTYPE, please add :-')"
   ;;
 esac
-chef gem install knife-block
+#chef gem install knife-block
