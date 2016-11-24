@@ -1,17 +1,17 @@
 var data = require("./mockdata.json");
 var service = require("./service.js");
 var shell = require('child_process').exec;
-var WitBot = require('../witaibot/index.js')
+//var WitBot = require('../witaibot/index.js')
 var Slack_file_upload = require('node-slack-upload');
 var fs = require('fs');
 const path = require('path');
-var slack_file_upload = new Slack_file_upload(process.env.EnvoProvToken);
+var slack_file_upload = new Slack_file_upload(process.env.SLACK_TOKEN);
 var Slack = require('slack-node');
-var slack = new Slack(process.env.EnvoProvToken);
+var slack = new Slack(process.env.SLACK_TOKEN);
 var Sync = require('sync')
 var request = require('request');
 var includes = require('array-includes');
-var witToken = process.env.WitToken
+//var witToken = process.env.WitToken
 var AWS = require('aws-sdk');
 var cache = require('memory-cache');
 
@@ -58,8 +58,7 @@ botcontroller.hears(['help'], ['direct_message'], function(bot, message) {
 });
 
 function askForTechnologyStack(userInfo, convo, bot, message) {
-    if(!userInfo.cluster)
-    {
+    if (!userInfo.cluster) {
         convo.ask('Which technology stack do you want installed on the VM? Apache, LAMP , MEAN or LEMP', [{
             pattern: '[a-z][A-Z][^bye]',
             callback: function(response, convo) {
@@ -95,11 +94,9 @@ function askForTechnologyStack(userInfo, convo, bot, message) {
                 convo.next();
             }
         }]);
-    }
-    else
-    {
+    } else {
         convo.ask('Which technology stack do you want installed on the cluster? Apache, LAMP , MEAN or LEMP. For now only 3 VMs would be provisioned.', [{
-        pattern: '[a-z][A-Z][^bye]',
+            pattern: '[a-z][A-Z][^bye]',
             callback: function(response, convo) {
                 userInfo.techStack = response.text;
                 var proper_response = includes(["LAMP", "MEAN", "LEMP", "Apache"], response.text)
@@ -147,41 +144,39 @@ function parse(str) {
 
 function deployVirtualMachine(userInfo, username, convo, bot, message) {
     console.log(userInfo)
-    if(userInfo.cluster)
-    {
-        switch(cache.get(username)){
+    if (userInfo.cluster) {
+        switch (cache.get(username)) {
             case 'LAMP':
-                createVM(username,convo,bot,message,'test1',['apache']);
-                createVM(username,convo,bot,message,'test2',['mysql-book']);
-                createVM(username,convo,bot,message,'test3',['php']);
+                createVM(username, convo, bot, message, 'test1', ['apache']);
+                createVM(username, convo, bot, message, 'test2', ['mysql-book']);
+                createVM(username, convo, bot, message, 'test3', ['php']);
                 break;
             case 'MEAN':
-                createVM(username,convo,bot,message,'test1',['mongodb3']);
-                createVM(username,convo,bot,message,'test2',['nodejs']);
-                createVM(username,convo,bot,message,'test3',['php']);
+                createVM(username, convo, bot, message, 'test1', ['mongodb3']);
+                createVM(username, convo, bot, message, 'test2', ['nodejs']);
+                createVM(username, convo, bot, message, 'test3', ['php']);
                 break;
             case 'Apache':
-                createVM(username, convo, bot, message, 'test1',['apache']);
+                createVM(username, convo, bot, message, 'test1', ['apache']);
                 break;
         }
-    }
-    else{
-        switch(cache.get(username)){
+    } else {
+        switch (cache.get(username)) {
             case 'LAMP':
-                createVM(username,convo,bot,message,'test1',['apache','mysql-book','php']);
+                createVM(username, convo, bot, message, 'test1', ['apache', 'mysql-book', 'php']);
                 break;
             case 'MEAN':
-                createVM(username,convo,bot,message,'test1',['mongodb3','nodejs','php']);
+                createVM(username, convo, bot, message, 'test1', ['mongodb3', 'nodejs', 'php']);
                 break;
             case 'Apache':
-                createVM(username, convo, bot, message, 'test1',['apache']);
+                createVM(username, convo, bot, message, 'test1', ['apache']);
                 break;
         }
     }
 
 }
 
-function createVM(username, convo, bot, message, nodeName, cookbookName){
+function createVM(username, convo, bot, message, nodeName, cookbookName) {
     service.getUserConfiguration(username, function(configuration) {
         service.getPrivateKeyInformation(username, function(private_key_info) {
             service.getPublicKeyInformation(username, function(public_key_info) {
@@ -269,8 +264,8 @@ function createVM(username, convo, bot, message, nodeName, cookbookName){
                                 // })
 
                                 runCookbook(cookbookName, configuration["ssh-user"], private_key_info.path, instanceIP, nodeName);
-        
-                                
+
+
                                 // cache.del(username);
                                 bot.reply(message, "Your instance is provisioned.");
 
@@ -581,153 +576,153 @@ var testDelete = function(userid, configuration, id) {
     });
 }
 var deleteResource = function(bot, message) {
-    var userName, num_vms;
-    bot.api.users.info({
-        user: message.user
-    }, (error, response) => {
-        userName = response.user.name;
-
-        bot.startConversation(message, function(err, convo) {
-
-            convo.addQuestion('Are you sure you want to delete?', [{
-                pattern: bot.utterances.yes,
-                callback: function(response, convo) {
-                    testDelete(id_vms);
-                    bot.reply(message, "Done! The cluster has been deleted\n");
-                    convo.stop();
-                }
-            }, {
-                pattern: bot.utterances.no,
-                callback: function(response, convo) {
-                    bot.reply(message, 'Ok. Have great day');
-                    convo.stop();
-                }
-            }, {
-                pattern: 'help',
-                callback: function(response, convo) {
-                    bot.reply(message, helpMessage);
-                    convo.stop();
-                }
-            }, {
-                default: true,
-                callback: function(response, convo) {
-                    bot.reply(message, 'I did not understand your response. Try again');
-                    convo.stop();
-                }
-            }], {}, 'ask_confirmation');
-
-
-            convo.ask("Could you provide the ID of the VM to be deleted?", function(response, convo) {
-                id_vms = response.text;
-                convo.next();
-            });
-
-            service.areCredentialsPresent(userName, function(isPresent) {
-                if (isPresent) {
-                    convo.ask('Sure! I have your Amazon EC2 credentials.Should I use them to delete this VM?', [{
-                        pattern: bot.utterances.yes,
-                        callback: function(response, convo) {
-                            service.checkInstances(userName, id_vms, function(okay) {
-                                if (!okay) {
-                                    convo.say('Sorry the VM ID selected does not exists or you do not have access rights to it');
-                                    convo.next();
-                                } else {
-                                    service.getUserConfiguration(userName, function(configuration) {
-                                        testDelete(userName, configuration, id_vms);
-                                    });
-                                    //convo.changeTopic('ask_confirmation');
-                                    convo.next();
-                                }
-
-                            });
-                        }
-                    }, {
-                        pattern: bot.utterances.no,
-                        callback: function(response, convo) {
-                            convo.say('Ok. Please provide new credentials');
-                            convo.next();
-                        }
-                    }, {
-                        pattern: 'help',
-                        callback: function(response, convo) {
-                            bot.reply(message, helpMessage);
-                            convo.stop();
-                        }
-                    }, {
-                        default: true,
-                        callback: function(response, convo) {
-                            convo.say('I did not understand your response');
-                            convo.next();
-                        }
-                    }]);
-                } else {
-                    convo.addQuestion('Provide Username', function(response, convo) {
-                        newUsername = response.text;
-                        convo.changeTopic('ask_password');
-                    }, {}, 'ask_username');
-
-                    convo.addQuestion('Provide password', function(response, convo) {
-                        newPassword = response.text;
-                        credReady = true;
-                        //console.log(id_vms+ "::");
-                        if (service.checkNewCredentials(newUsername, newPassword, data.new_credentials)) {
-                            if (service.checkInstances(newUsername, data.instances1, id_vms)) {
-                                convo.changeTopic('ask_confirmation');
-                            } else {
-                                bot.reply(message, 'Sorry the VM ID selected does not exists or you do not have access rights to it');
-                            }
-
-                        } else {
-                            bot.reply(message, 'Wrong credentials. Try again!');
-                            convo.changeTopic('ask_username');
-                        }
-                    }, {}, 'ask_password');
-
-
-                    convo.ask('I dont have your credentials. Can you provide them?', [{
-                        pattern: bot.utterances.yes,
-                        callback: function(response, convo) {
-                            convo.changeTopic('ask_username');
-                            convo.next();
-                        }
-                    }, {
-                        default: true,
-                        callback: function(response, convo) {
-                            convo.say('I didnt understand your response');
-                            convo.repeat();
-                            convo.next();
-                        }
-                    }]);
-                }
-
-            });
-        });
-    });
-}
-var witbot = WitBot(witToken);
-
-botcontroller.hears('.*', ['direct_message', 'direct_mention'], function(bot, message) {
-    //console.log(message);
-    var wit = witbot.process(message.text, bot, message);
-
-    wit.hears('greeting', 0.5, function(bot, message, outcome) {
+        var userName, num_vms;
         bot.api.users.info({
             user: message.user
         }, (error, response) => {
-            var name = response.user.name;
-            bot.reply(message, "Hi @" + name + " .How can I help you?");
+            userName = response.user.name;
+
+            bot.startConversation(message, function(err, convo) {
+
+                convo.addQuestion('Are you sure you want to delete?', [{
+                    pattern: bot.utterances.yes,
+                    callback: function(response, convo) {
+                        testDelete(id_vms);
+                        bot.reply(message, "Done! The cluster has been deleted\n");
+                        convo.stop();
+                    }
+                }, {
+                    pattern: bot.utterances.no,
+                    callback: function(response, convo) {
+                        bot.reply(message, 'Ok. Have great day');
+                        convo.stop();
+                    }
+                }, {
+                    pattern: 'help',
+                    callback: function(response, convo) {
+                        bot.reply(message, helpMessage);
+                        convo.stop();
+                    }
+                }, {
+                    default: true,
+                    callback: function(response, convo) {
+                        bot.reply(message, 'I did not understand your response. Try again');
+                        convo.stop();
+                    }
+                }], {}, 'ask_confirmation');
+
+
+                convo.ask("Could you provide the ID of the VM to be deleted?", function(response, convo) {
+                    id_vms = response.text;
+                    convo.next();
+                });
+
+                service.areCredentialsPresent(userName, function(isPresent) {
+                    if (isPresent) {
+                        convo.ask('Sure! I have your Amazon EC2 credentials.Should I use them to delete this VM?', [{
+                            pattern: bot.utterances.yes,
+                            callback: function(response, convo) {
+                                service.checkInstances(userName, id_vms, function(okay) {
+                                    if (!okay) {
+                                        convo.say('Sorry the VM ID selected does not exists or you do not have access rights to it');
+                                        convo.next();
+                                    } else {
+                                        service.getUserConfiguration(userName, function(configuration) {
+                                            testDelete(userName, configuration, id_vms);
+                                        });
+                                        //convo.changeTopic('ask_confirmation');
+                                        convo.next();
+                                    }
+
+                                });
+                            }
+                        }, {
+                            pattern: bot.utterances.no,
+                            callback: function(response, convo) {
+                                convo.say('Ok. Please provide new credentials');
+                                convo.next();
+                            }
+                        }, {
+                            pattern: 'help',
+                            callback: function(response, convo) {
+                                bot.reply(message, helpMessage);
+                                convo.stop();
+                            }
+                        }, {
+                            default: true,
+                            callback: function(response, convo) {
+                                convo.say('I did not understand your response');
+                                convo.next();
+                            }
+                        }]);
+                    } else {
+                        convo.addQuestion('Provide Username', function(response, convo) {
+                            newUsername = response.text;
+                            convo.changeTopic('ask_password');
+                        }, {}, 'ask_username');
+
+                        convo.addQuestion('Provide password', function(response, convo) {
+                            newPassword = response.text;
+                            credReady = true;
+                            //console.log(id_vms+ "::");
+                            if (service.checkNewCredentials(newUsername, newPassword, data.new_credentials)) {
+                                if (service.checkInstances(newUsername, data.instances1, id_vms)) {
+                                    convo.changeTopic('ask_confirmation');
+                                } else {
+                                    bot.reply(message, 'Sorry the VM ID selected does not exists or you do not have access rights to it');
+                                }
+
+                            } else {
+                                bot.reply(message, 'Wrong credentials. Try again!');
+                                convo.changeTopic('ask_username');
+                            }
+                        }, {}, 'ask_password');
+
+
+                        convo.ask('I dont have your credentials. Can you provide them?', [{
+                            pattern: bot.utterances.yes,
+                            callback: function(response, convo) {
+                                convo.changeTopic('ask_username');
+                                convo.next();
+                            }
+                        }, {
+                            default: true,
+                            callback: function(response, convo) {
+                                convo.say('I didnt understand your response');
+                                convo.repeat();
+                                convo.next();
+                            }
+                        }]);
+                    }
+
+                });
+            });
         });
-    })
+    }
+    //var witbot = WitBot(witToken);
+    /*
+    botcontroller.hears('.*', ['direct_message', 'direct_mention'], function(bot, message) {
+        //console.log(message);
+        //var wit = witbot.process(message.text, bot, message);
 
-    wit.hears('cheerful question', 0.5, function(bot, message, outcome) {
-        bot.reply(message, "I am good, how're you?")
-    })
+        wit.hears('greeting', 0.5, function(bot, message, outcome) {
+            bot.api.users.info({
+                user: message.user
+            }, (error, response) => {
+                var name = response.user.name;
+                bot.reply(message, "Hi @" + name + " .How can I help you?");
+            });
+        })
 
-    wit.hears('create VM', 0.5, deployVm);
-    wit.hears('create cluster', 0.5, createCluster);
-    wit.hears('list resources', 0.5, listResources);
-    wit.hears('delete resource', 0.5, deleteResource);
-    wit.otherwise(function(bot, message) {
-        bot.reply(message, 'You are so intelligent, and I am so simple. I don\'t understnd')
-    })
-});
+        wit.hears('cheerful question', 0.5, function(bot, message, outcome) {
+            bot.reply(message, "I am good, how're you?")
+        })
+
+        wit.hears('create VM', 0.5, deployVm);
+        wit.hears('create cluster', 0.5, createCluster);
+        wit.hears('list resources', 0.5, listResources);
+        wit.hears('delete resource', 0.5, deleteResource);
+        wit.otherwise(function(bot, message) {
+            bot.reply(message, 'You are so intelligent, and I am so simple. I don\'t understnd')
+        })
+    });*/
