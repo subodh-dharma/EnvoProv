@@ -1,0 +1,8 @@
+name: EnvoProv
+description: Helping you set VMs on request
+email: ssdharma@ncsu.edu
+avatar: .envoprov/robot.jpg
+slackscopes:
+ - bot
+ - reactions:write
+ - message.im
