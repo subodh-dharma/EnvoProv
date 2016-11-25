@@ -26,7 +26,7 @@ var botcontroller = botkit.slackbot({
 });
 
 var botinstance = botcontroller.spawn({
-    token: process.env.EnvoProvToken
+    token: process.env.SLACK_TOKEN
 });
 
 
