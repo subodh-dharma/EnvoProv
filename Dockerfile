@@ -1,6 +1,6 @@
 FROM node:6.2-onbuild
 
-RUN python --version
+RUN ln -s /usr/bin/nodejs /usr/bin/node
 RUN chmod +x setup.sh
 RUN wget https://packages.chef.io/stable/ubuntu/12.04/chefdk_0.19.6-1_amd64.deb
 RUN dpkg -i chefdk_0.19.6-1_amd64.deb

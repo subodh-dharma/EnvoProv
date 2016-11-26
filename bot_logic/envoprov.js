@@ -1,7 +1,7 @@
 var data = require("./mockdata.json");
 var service = require("./service.js");
 var shell = require('child_process').exec;
-//var WitBot = require('../witaibot/index.js')
+var WitBot = require('../witaibot/index.js')
 var Slack_file_upload = require('node-slack-upload');
 var fs = require('fs');
 const path = require('path');
@@ -11,7 +11,7 @@ var slack = new Slack(process.env.SLACK_TOKEN);
 var Sync = require('sync')
 var request = require('request');
 var includes = require('array-includes');
-//var witToken = process.env.WitToken
+var witToken = process.env.WitToken
 var AWS = require('aws-sdk');
 var cache = require('memory-cache');
 
@@ -576,153 +576,153 @@ var testDelete = function(userid, configuration, id) {
     });
 }
 var deleteResource = function(bot, message) {
-        var userName, num_vms;
+    var userName, num_vms;
+    bot.api.users.info({
+        user: message.user
+    }, (error, response) => {
+        userName = response.user.name;
+
+        bot.startConversation(message, function(err, convo) {
+
+            convo.addQuestion('Are you sure you want to delete?', [{
+                pattern: bot.utterances.yes,
+                callback: function(response, convo) {
+                    testDelete(id_vms);
+                    bot.reply(message, "Done! The cluster has been deleted\n");
+                    convo.stop();
+                }
+            }, {
+                pattern: bot.utterances.no,
+                callback: function(response, convo) {
+                    bot.reply(message, 'Ok. Have great day');
+                    convo.stop();
+                }
+            }, {
+                pattern: 'help',
+                callback: function(response, convo) {
+                    bot.reply(message, helpMessage);
+                    convo.stop();
+                }
+            }, {
+                default: true,
+                callback: function(response, convo) {
+                    bot.reply(message, 'I did not understand your response. Try again');
+                    convo.stop();
+                }
+            }], {}, 'ask_confirmation');
+
+
+            convo.ask("Could you provide the ID of the VM to be deleted?", function(response, convo) {
+                id_vms = response.text;
+                convo.next();
+            });
+
+            service.areCredentialsPresent(userName, function(isPresent) {
+                if (isPresent) {
+                    convo.ask('Sure! I have your Amazon EC2 credentials.Should I use them to delete this VM?', [{
+                        pattern: bot.utterances.yes,
+                        callback: function(response, convo) {
+                            service.checkInstances(userName, id_vms, function(okay) {
+                                if (!okay) {
+                                    convo.say('Sorry the VM ID selected does not exists or you do not have access rights to it');
+                                    convo.next();
+                                } else {
+                                    service.getUserConfiguration(userName, function(configuration) {
+                                        testDelete(userName, configuration, id_vms);
+                                    });
+                                    //convo.changeTopic('ask_confirmation');
+                                    convo.next();
+                                }
+
+                            });
+                        }
+                    }, {
+                        pattern: bot.utterances.no,
+                        callback: function(response, convo) {
+                            convo.say('Ok. Please provide new credentials');
+                            convo.next();
+                        }
+                    }, {
+                        pattern: 'help',
+                        callback: function(response, convo) {
+                            bot.reply(message, helpMessage);
+                            convo.stop();
+                        }
+                    }, {
+                        default: true,
+                        callback: function(response, convo) {
+                            convo.say('I did not understand your response');
+                            convo.next();
+                        }
+                    }]);
+                } else {
+                    convo.addQuestion('Provide Username', function(response, convo) {
+                        newUsername = response.text;
+                        convo.changeTopic('ask_password');
+                    }, {}, 'ask_username');
+
+                    convo.addQuestion('Provide password', function(response, convo) {
+                        newPassword = response.text;
+                        credReady = true;
+                        //console.log(id_vms+ "::");
+                        if (service.checkNewCredentials(newUsername, newPassword, data.new_credentials)) {
+                            if (service.checkInstances(newUsername, data.instances1, id_vms)) {
+                                convo.changeTopic('ask_confirmation');
+                            } else {
+                                bot.reply(message, 'Sorry the VM ID selected does not exists or you do not have access rights to it');
+                            }
+
+                        } else {
+                            bot.reply(message, 'Wrong credentials. Try again!');
+                            convo.changeTopic('ask_username');
+                        }
+                    }, {}, 'ask_password');
+
+
+                    convo.ask('I dont have your credentials. Can you provide them?', [{
+                        pattern: bot.utterances.yes,
+                        callback: function(response, convo) {
+                            convo.changeTopic('ask_username');
+                            convo.next();
+                        }
+                    }, {
+                        default: true,
+                        callback: function(response, convo) {
+                            convo.say('I didnt understand your response');
+                            convo.repeat();
+                            convo.next();
+                        }
+                    }]);
+                }
+
+            });
+        });
+    });
+}
+var witbot = WitBot(witToken);
+
+botcontroller.hears('.*', ['direct_message', 'direct_mention'], function(bot, message) {
+    //console.log(message);
+    var wit = witbot.process(message.text, bot, message);
+
+    wit.hears('greeting', 0.5, function(bot, message, outcome) {
         bot.api.users.info({
             user: message.user
         }, (error, response) => {
-            userName = response.user.name;
-
-            bot.startConversation(message, function(err, convo) {
-
-                convo.addQuestion('Are you sure you want to delete?', [{
-                    pattern: bot.utterances.yes,
-                    callback: function(response, convo) {
-                        testDelete(id_vms);
-                        bot.reply(message, "Done! The cluster has been deleted\n");
-                        convo.stop();
-                    }
-                }, {
-                    pattern: bot.utterances.no,
-                    callback: function(response, convo) {
-                        bot.reply(message, 'Ok. Have great day');
-                        convo.stop();
-                    }
-                }, {
-                    pattern: 'help',
-                    callback: function(response, convo) {
-                        bot.reply(message, helpMessage);
-                        convo.stop();
-                    }
-                }, {
-                    default: true,
-                    callback: function(response, convo) {
-                        bot.reply(message, 'I did not understand your response. Try again');
-                        convo.stop();
-                    }
-                }], {}, 'ask_confirmation');
-
-
-                convo.ask("Could you provide the ID of the VM to be deleted?", function(response, convo) {
-                    id_vms = response.text;
-                    convo.next();
-                });
-
-                service.areCredentialsPresent(userName, function(isPresent) {
-                    if (isPresent) {
-                        convo.ask('Sure! I have your Amazon EC2 credentials.Should I use them to delete this VM?', [{
-                            pattern: bot.utterances.yes,
-                            callback: function(response, convo) {
-                                service.checkInstances(userName, id_vms, function(okay) {
-                                    if (!okay) {
-                                        convo.say('Sorry the VM ID selected does not exists or you do not have access rights to it');
-                                        convo.next();
-                                    } else {
-                                        service.getUserConfiguration(userName, function(configuration) {
-                                            testDelete(userName, configuration, id_vms);
-                                        });
-                                        //convo.changeTopic('ask_confirmation');
-                                        convo.next();
-                                    }
-
-                                });
-                            }
-                        }, {
-                            pattern: bot.utterances.no,
-                            callback: function(response, convo) {
-                                convo.say('Ok. Please provide new credentials');
-                                convo.next();
-                            }
-                        }, {
-                            pattern: 'help',
-                            callback: function(response, convo) {
-                                bot.reply(message, helpMessage);
-                                convo.stop();
-                            }
-                        }, {
-                            default: true,
-                            callback: function(response, convo) {
-                                convo.say('I did not understand your response');
-                                convo.next();
-                            }
-                        }]);
-                    } else {
-                        convo.addQuestion('Provide Username', function(response, convo) {
-                            newUsername = response.text;
-                            convo.changeTopic('ask_password');
-                        }, {}, 'ask_username');
-
-                        convo.addQuestion('Provide password', function(response, convo) {
-                            newPassword = response.text;
-                            credReady = true;
-                            //console.log(id_vms+ "::");
-                            if (service.checkNewCredentials(newUsername, newPassword, data.new_credentials)) {
-                                if (service.checkInstances(newUsername, data.instances1, id_vms)) {
-                                    convo.changeTopic('ask_confirmation');
-                                } else {
-                                    bot.reply(message, 'Sorry the VM ID selected does not exists or you do not have access rights to it');
-                                }
-
-                            } else {
-                                bot.reply(message, 'Wrong credentials. Try again!');
-                                convo.changeTopic('ask_username');
-                            }
-                        }, {}, 'ask_password');
-
-
-                        convo.ask('I dont have your credentials. Can you provide them?', [{
-                            pattern: bot.utterances.yes,
-                            callback: function(response, convo) {
-                                convo.changeTopic('ask_username');
-                                convo.next();
-                            }
-                        }, {
-                            default: true,
-                            callback: function(response, convo) {
-                                convo.say('I didnt understand your response');
-                                convo.repeat();
-                                convo.next();
-                            }
-                        }]);
-                    }
-
-                });
-            });
+            var name = response.user.name;
+            bot.reply(message, "Hi @" + name + " .How can I help you?");
         });
-    }
-    //var witbot = WitBot(witToken);
-    /*
-    botcontroller.hears('.*', ['direct_message', 'direct_mention'], function(bot, message) {
-        //console.log(message);
-        //var wit = witbot.process(message.text, bot, message);
+    })
 
-        wit.hears('greeting', 0.5, function(bot, message, outcome) {
-            bot.api.users.info({
-                user: message.user
-            }, (error, response) => {
-                var name = response.user.name;
-                bot.reply(message, "Hi @" + name + " .How can I help you?");
-            });
-        })
+    wit.hears('cheerful question', 0.5, function(bot, message, outcome) {
+        bot.reply(message, "I am good, how're you?")
+    })
 
-        wit.hears('cheerful question', 0.5, function(bot, message, outcome) {
-            bot.reply(message, "I am good, how're you?")
-        })
-
-        wit.hears('create VM', 0.5, deployVm);
-        wit.hears('create cluster', 0.5, createCluster);
-        wit.hears('list resources', 0.5, listResources);
-        wit.hears('delete resource', 0.5, deleteResource);
-        wit.otherwise(function(bot, message) {
-            bot.reply(message, 'You are so intelligent, and I am so simple. I don\'t understnd')
-        })
-    });*/
+    wit.hears('create VM', 0.5, deployVm);
+    wit.hears('create cluster', 0.5, createCluster);
+    wit.hears('list resources', 0.5, listResources);
+    wit.hears('delete resource', 0.5, deleteResource);
+    wit.otherwise(function(bot, message) {
+        bot.reply(message, 'You are so intelligent, and I am so simple. I don\'t understnd')
+    })
+});
