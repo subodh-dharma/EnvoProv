@@ -1,5 +1,7 @@
 FROM node:6.2-onbuild
 
+RUN uname -a
+
 # Linking nodejs and node - required for wit ai token
 RUN ln -s /usr/bin/nodejs /usr/bin/node
 #RUN chmod +x setup.sh
@@ -12,8 +14,7 @@ RUN chef gem install knife-block > /dev/null
 
 # Installing mongodb
 RUN apt-get update
-RUN apt-get -y install mongodb mongodb-org mongodb-server
-RUN ufw allow from 127.0.0.1/32 to any port 27017
+RUN apt-get -y install mongodb
 
 # Running mongodb service
 RUN service mongodb start
