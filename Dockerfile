@@ -12,8 +12,8 @@ RUN chef gem install knife-block > /dev/null
 # Installing mongodb server locally
 RUN dpkg --configure -a
 RUN apt-get install -f
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
-RUN echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.0.list
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+RUN echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.2.list
 RUN apt-get update
 RUN apt-get install -y mongodb-org
 RUN echo "mongodb-org hold" | dpkg --set-selections
