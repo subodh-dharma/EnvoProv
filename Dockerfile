@@ -22,4 +22,4 @@ RUN echo "mongodb-org-mongos hold" | dpkg --set-selections
 RUN echo "mongodb-org-tools hold" | dpkg --set-selections
 
 # Running mongodb service
-RUN /etc/init.d/mongod start
+RUN sudo /etc/init.d/mongod start
