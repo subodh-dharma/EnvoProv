@@ -1,7 +1,7 @@
 #FROM node:6.2-onbuild
 FROM ubuntu:latest
 
-RUN apt-get -y install nodejs
+RUN apt-get -y install node
 RUN apt-get -y install npm
 
 # Linking nodejs and node - required for wit ai token
