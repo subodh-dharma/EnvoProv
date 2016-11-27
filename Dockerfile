@@ -11,6 +11,7 @@ RUN chef gem install knife-block > /dev/null
 #RUN /usr/src/app/setup.sh
 
 # Installing mongodb
+RUN apt-get update
 RUN apt-get -y install mongodb
 
 # Running mongodb service
