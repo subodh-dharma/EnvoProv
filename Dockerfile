@@ -5,11 +5,13 @@ RUN ln -s /usr/bin/nodejs /usr/bin/node
 
 # Installing chef and knife
 RUN wget https://packages.chef.io/stable/ubuntu/12.04/chefdk_0.19.6-1_amd64.deb
-RUN dpkg -i chefdk_0.19.6-1_amd64.deb
-RUN chef gem install knife-block
+RUN dpkg -i chefdk_0.19.6-1_amd64.deb > /dev/null
+RUN chef gem install knife-block > /dev/null
 #RUN /usr/src/app/setup.sh
 
 # Installing mongodb server locally
+RUN dpkg --configure -a
+RUN apt-get install -f
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
 RUN echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.0.list
 RUN apt-get update
