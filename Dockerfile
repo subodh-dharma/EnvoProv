@@ -15,7 +15,7 @@ RUN apt-get install -f
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
 RUN echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.2.list
 RUN apt-get update
-RUN apt-get install -y mongodb-org
+RUN apt-get install -y mongodb-org mongodb-org-server mongodb-org-shell mongodb-org-mongos mongodb-org-tools
 RUN echo "mongodb-org hold" | dpkg --set-selections
 RUN echo "mongodb-org-server hold" | dpkg --set-selections
 RUN echo "mongodb-org-shell hold" | dpkg --set-selections
