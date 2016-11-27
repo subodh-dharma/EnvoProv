@@ -1,4 +1,9 @@
-FROM node:6.2-onbuild
+#FROM node:6.2-onbuild
+FROM ubuntu:latest
+
+RUN apt-get -y install nodejs
+RUN apt-get -y install npm
+
 # Linking nodejs and node - required for wit ai token
 RUN ln -s /usr/bin/nodejs /usr/bin/node
 #RUN chmod +x setup.sh
@@ -22,4 +27,4 @@ RUN echo "mongodb-org-mongos hold" | dpkg --set-selections
 RUN echo "mongodb-org-tools hold" | dpkg --set-selections
 
 # Running mongodb service
-RUN sudo /etc/init.d/mongod start
+RUN /etc/init.d/mongod start
