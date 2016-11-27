@@ -15,4 +15,4 @@ RUN apt-get update
 RUN apt-get -y install mongodb
 
 # Running mongodb service
-RUN service mongodb start
+RUN service mongod start
