@@ -12,7 +12,7 @@ RUN chef gem install knife-block > /dev/null
 
 # Installing mongodb
 RUN apt-get update
-RUN apt-get -y install mongodb
+RUN apt-get -y install mongodb mongodb-org mongodb-server
 RUN ufw allow from 127.0.0.1/32 to any port 27017
 
 # Running mongodb service
