@@ -23,6 +23,5 @@ RUN echo "mongodb-org-mongos hold" | dpkg --set-selections
 RUN echo "mongodb-org-tools hold" | dpkg --set-selections
 
 # Running mongodb service
-#RUN rm /var/lib/mongodb/mongod.lock
-#RUN mongod --repair
-RUN service mongodb start
+RUN service --status-all
+RUN /etc/init.d/mongod status
