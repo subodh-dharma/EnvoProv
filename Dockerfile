@@ -16,4 +16,4 @@ RUN apt-get -y install mongodb mongodb-org mongodb-server
 RUN ufw allow from 127.0.0.1/32 to any port 27017
 
 # Running mongodb service
-#RUN service mongod start
+RUN service mongodb start
