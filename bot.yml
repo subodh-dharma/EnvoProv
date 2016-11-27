@@ -7,10 +7,6 @@ config:
     friendly_name: Wit AI token for NLP
     info: Wit package usage token
     type: secret
-  - name: RSA
-    friendly_name: Private Key
-    info: private key for chef and aws access
-    type: secret
 slackscopes:
  - bot
  - reactions:write
