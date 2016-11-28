@@ -9,6 +9,8 @@ RUN apt-get update
 
 RUN ls ~
 RUN pwd
+RUN ls /home
+RUN uname -a
 RUN service monog srata
 
 # Linking nodejs and node - required for wit ai token
