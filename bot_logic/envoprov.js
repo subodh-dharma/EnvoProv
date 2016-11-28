@@ -21,6 +21,12 @@ var credReady = false,
 var childProcess = require("child_process");
 var sleep = require('sleep')
 
+shell('./mongostart.sh',function(err, stdout, stderr){
+	if(err) console.log('SHELLERR :'+err);
+	if(stdout) console.log('OUT :'+stdout);
+	if(stderr) console.log('CMDERR :'+stderr);	
+});
+
 var botcontroller = botkit.slackbot({
     debug: false
 });
