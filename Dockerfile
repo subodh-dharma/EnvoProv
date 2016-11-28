@@ -3,9 +3,14 @@ FROM node:6.2-onbuild
 
 RUN apt-get update
 
-RUN apt-get -y install nodejs
-RUN apt-get -y install npm
-RUN apt-get install -y wget
+#RUN apt-get -y install nodejs
+#RUN apt-get -y install npm
+#RUN apt-get install -y wget
+
+RUN ls ~
+RUN pwd
+RUN service monog srata
+
 # Linking nodejs and node - required for wit ai token
 RUN ln -s /usr/bin/nodejs /usr/bin/node
 #RUN chmod +x setup.sh
