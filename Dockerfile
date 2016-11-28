@@ -1,7 +1,11 @@
 FROM node:6.2-onbuild
+#FROM ubuntu:latest
 
-RUN uname -a
+RUN apt-get update
 
+RUN apt-get -y install nodejs
+RUN apt-get -y install npm
+RUN apt-get install -y wget
 # Linking nodejs and node - required for wit ai token
 RUN ln -s /usr/bin/nodejs /usr/bin/node
 #RUN chmod +x setup.sh
@@ -17,4 +21,4 @@ RUN apt-get update
 RUN apt-get -y install mongodb
 
 # Running mongodb service
-RUN service mongodb start
+#RUN service mongodb start
